@@ -40,25 +40,45 @@ EMAIL_RE = re.compile(r"^[\S]+@[\S]+.[\S]+$")
 
 
 def valid_password(password):
+    '''validates entered password'''
     return PASS_RE.match(password)
 
 
 def valid_username(username):
+    '''validates entered username'''
     return USER_RE.match(username)
 
 
 def valid_email(email):
+    '''validates email'''
     return EMAIL_RE.match(email)
 
-
+# User database model
 class Users(db.Model):
     username = db.StringProperty(required=True)
     password_hash = db.StringProperty(required=True)
     salt = db.StringProperty(required=True)
     email = db.EmailProperty(required=False)
 
+# Comments database model
+class Comment_db(db.Model):
+    post_id = db.StringProperty()
+    created_by = db.StringProperty()
+    text = db.TextProperty()
+    date_created = db.DateTimeProperty(auto_now_add=True)
+
+# Blog post database model
+class BlogPosts(db.Model):
+    subject = db.StringProperty()
+    content = db.TextProperty()
+    likes = db.IntegerProperty(default=0)
+    dislikes = db.IntegerProperty(default=0)
+    created_by = db.StringProperty()
+    date_created = db.DateTimeProperty(auto_now_add=True)
+
 
 def hashed_key(key, salt=None):
+    ''' Takes a key and salt(optional) as arguments and return a sha512 hashed string'''
     if not salt:
         salt = uuid.uuid4().hex
     hashed_key = hashlib.sha512(key + salt).hexdigest()
@@ -66,6 +86,7 @@ def hashed_key(key, salt=None):
 
 
 def gen_user_cookie(user_id):
+    '''Generates hashed user cookie string from user id using a secret key #xadahiya'''
     hashed_user_id = hashed_key(user_id, "xadahiya").split("|")[0]
     return "%s|%s" % (user_id, hashed_user_id)
 
@@ -144,15 +165,9 @@ class LoginPage(webapp2.RequestHandler):
 
     def get(self):
         self.response.headers['Content-Type'] = 'text/html'
-
-        # user_cookie = self.request.cookies.get('userid')
-        # user = validate_user_cookie(user_cookie)
-        # if not user:
         template_values = {}
         template = jinja_environment.get_template('login.html')
         self.response.out.write(template.render(template_values))
-        # else:
-        # self.redirect('/user/welcome')
 
     def post(self):
         template_values = {}
@@ -167,7 +182,6 @@ class LoginPage(webapp2.RequestHandler):
             if not hashed_key(password, user.salt).split("|")[0] == user.password_hash:
                 template_values['error'] = "Invalid Password"
                 template_values['username'] = username
-            # print user.password_hash, user.salt
         except:
             template_values['error'] = "Username does not exits"
 
@@ -208,24 +222,6 @@ class LogoutPage(webapp2.RequestHandler):
     def get(self):
         self.response.delete_cookie('userid')
         self.redirect("/signup")
-
-# Blog post database
-
-
-class BlogPosts(db.Model):
-    subject = db.StringProperty()
-    content = db.TextProperty()
-    likes = db.IntegerProperty(default=0)
-    dislikes = db.IntegerProperty(default=0)
-    created_by = db.StringProperty()
-    date_created = db.DateTimeProperty(auto_now_add=True)
-
-
-class Comment_db(db.Model):
-    post_id = db.StringProperty()
-    created_by = db.StringProperty()
-    text = db.TextProperty()
-    date_created = db.DateTimeProperty(auto_now_add=True)
 
 
 class BlogPage(webapp2.RequestHandler):
@@ -369,8 +365,6 @@ class EditPage(webapp2.RequestHandler):
             post.subject = subject
             post.content = content
             post.put()
-            # print key.id()
-            self.redirect('/blog/' + str(id))
 
 
 class DeletePage(webapp2.RequestHandler):
@@ -469,7 +463,6 @@ class EditCommentPage(webapp2.RequestHandler):
         else:
             comment.text = comment_text
             comment.put()
-            # print key.id()
             self.redirect('/blog/' + str(comment.post_id))
 
 
