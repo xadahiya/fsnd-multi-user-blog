@@ -1,27 +1,24 @@
-<!DOCTYPE html>
-<html>
+{% extends 'base.html' %}
+{% block title %}
+  {{data.subject}}
+{% endblock %}
+{% block content %}
+  <h1><a href="/blog">Blog Home</a></h1>
+  <hr>
+  <h3>Edit post</h3>
+  <form method="post">
+    <label for="subject">Subject</label>
+    <input type="text" name="subject" id="subject" value={{data.subject}}>
+    <br>
+    <br>
+    <label for="content">Content</label>
+    <textarea name="content" id="content" rows="8" cols="40">{{data.content}}</textarea>
+    <div class="error">
+      <h3>{{error}}</h3>
+    </div>
+    <input type="submit" value="submit">
+  </form>
+  <a href="/blog/{{data.key().id()}}">Back</a>
 
-<head>
-    <meta charset="utf-8">
-    <title>{{data.subject}}</title>
-</head>
 
-<body>
-    <h1><a href="/blog">Blog Home</a></h1>
-    <hr>
-    <h3>Edit post</h3>
-    <form method="post">
-        <label for="subject">Subject</label>
-        <input type="text" name="subject" id="subject" value={{data.subject}}>
-        <br>
-        <br>
-        <label for="content">Content</label>
-        <textarea name="content" id="content" rows="8" cols="40">{{data.content}}</textarea>
-        <div class="error">
-            <h3>{{error}}</h3>
-        </div>
-        <input type="submit" value="submit">
-    </form>
-</body>
-
-</html>
+{% endblock %}

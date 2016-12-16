@@ -1,22 +1,17 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <meta charset="utf-8">
-    <title>Edit Comment</title>
-</head>
-
-<body>
-    <h1><a href="/blog">Blog Home</a></h1>
-    <hr>
-    <h3>Edit Comment</h3>
-    <form method="post">
-        <textarea name="comment" id="comment" cols="30" rows="10">{{data.text}}</textarea>
-        <div class="error">
-            <h3>{{error}}</h3>
-        </div>
-        <input type="submit" value="submit">
-    </form>
-</body>
-
-</html>
+{% extends 'base.html' %}
+{% block title %}
+  Edit Comment
+{% endblock %}
+{% block content %}
+  <h1><a href="/blog">Blog Home</a></h1>
+  <hr>
+  <h3>Edit Comment</h3>
+  <form method="post">
+    <textarea name="comment" id="comment" cols="30" rows="10">{{data.text}}</textarea>
+    <div class="error">
+      <h3>{{error}}</h3>
+    </div>
+    <input type="submit" value="submit">
+  </form>
+  <a href="/blog/{{data.post_id}}">Back</a>
+{% endblock %}

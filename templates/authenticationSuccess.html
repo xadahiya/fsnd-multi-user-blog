@@ -1,15 +1,9 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <meta charset="utf-8">
-    <title></title>
-</head>
-
-<body>
-    <h1>
-        Welcome, {{name}}
-      </h1>
-</body>
-
-</html>
+{% extends 'base.html' %}
+{% block title %}
+  Welcome {{name}}
+{% endblock %}
+{% block content %}
+  <h1>
+    Welcome, {{name}}
+  </h1>
+{% endblock %}
