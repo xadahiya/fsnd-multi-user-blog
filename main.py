@@ -215,10 +215,11 @@ class LogoutPage(webapp2.RequestHandler):
 class BlogPosts(db.Model):
     subject = db.StringProperty()
     content = db.TextProperty()
-    likes = db.IntegerProperty(default = 0)
-    dislikes = db.IntegerProperty(default = 0)
+    likes = db.IntegerProperty(default=0)
+    dislikes = db.IntegerProperty(default=0)
     created_by = db.StringProperty()
     date_created = db.DateTimeProperty(auto_now_add=True)
+
 
 class Comment_db(db.Model):
     post_id = db.StringProperty()
@@ -236,6 +237,7 @@ class BlogPage(webapp2.RequestHandler):
         template_values = {"data": q}
         template = jinja_environment.get_template('blog.html')
         self.response.out.write(template.render(template_values))
+
 
 class BlogNewPostPage(webapp2.RequestHandler):
 
@@ -260,24 +262,27 @@ class BlogNewPostPage(webapp2.RequestHandler):
             content = self.request.get("content")
             # Handles errors messages
             if not subject and not content:
-                template_values['error'] = "You need to enter some data for a blog post :p"
+                template_values[
+                    'error'] = "You need to enter some data for a blog post :p"
             elif not content:
-                    template_values['error'] = "You need to enter some content"
-                    template_values['subject'] = subject
+                template_values['error'] = "You need to enter some content"
+                template_values['subject'] = subject
             elif not subject:
-                    template_values['error'] = "You need to enter a subject"
-                    template_values["content"] = content
+                template_values['error'] = "You need to enter a subject"
+                template_values["content"] = content
 
             if template_values:
                 template = jinja_environment.get_template('newpost.html')
                 self.response.out.write(template.render(template_values))
             else:
-                post = BlogPosts(subject=subject, content=content, created_by=user.username)
+                post = BlogPosts(subject=subject, content=content,
+                                 created_by=user.username)
                 post_id = post.put().id()
                 # print key.id()
                 self.redirect('/blog/' + str(post_id))
         else:
             self.redirect('/login')
+
 
 class PostPage(webapp2.RequestHandler):
 
@@ -285,13 +290,13 @@ class PostPage(webapp2.RequestHandler):
         id = int(id)
         post = BlogPosts.get_by_id(id)
         comment_data = Comment_db.all()
-        comment_data.filter("post_id =",str(id))
+        comment_data.filter("post_id =", str(id))
 
-        template_values = {"data": post, "comment_data":comment_data}
+        template_values = {"data": post, "comment_data": comment_data}
         template = jinja_environment.get_template('blogpost.html')
         self.response.out.write(template.render(template_values))
 
-    def post(self,id):
+    def post(self, id):
         user_cookie = self.request.cookies.get('userid')
         if user_cookie:
             user = validate_user_cookie(user_cookie)
@@ -310,7 +315,8 @@ class PostPage(webapp2.RequestHandler):
                 template = jinja_environment.get_template('blogpost.html')
                 self.response.out.write(template.render(template_values))
             else:
-                new_comment = Comment_db(post_id = str(id), created_by = user.username, text = comment_data)
+                new_comment = Comment_db(post_id=str(
+                    id), created_by=user.username, text=comment_data)
                 new_comment.put()
                 # print key.id()
                 self.redirect('/blog/' + str(id))
@@ -334,11 +340,12 @@ class EditPage(webapp2.RequestHandler):
                 template = jinja_environment.get_template('editpost.html')
                 self.response.out.write(template.render(template_values))
             else:
-                self.response.out.write("You cannot edit someone else's post :p")
+                self.response.out.write(
+                    "You cannot edit someone else's post :p")
         else:
             self.redirect("/signup")
 
-    def post(self,id):
+    def post(self, id):
         id = int(id)
         post = BlogPosts.get_by_id(id)
         template_values = {}
@@ -346,13 +353,14 @@ class EditPage(webapp2.RequestHandler):
         content = self.request.get("content")
         # Handles errors messages
         if not subject and not content:
-            template_values['error'] = "You need to enter some data for a blog post :p"
+            template_values[
+                'error'] = "You need to enter some data for a blog post :p"
         elif not content:
-                template_values['error'] = "You need to enter some content"
-                template_values['subject'] = subject
+            template_values['error'] = "You need to enter some content"
+            template_values['subject'] = subject
         elif not subject:
-                template_values['error'] = "You need to enter a subject"
-                template_values["content"] = content
+            template_values['error'] = "You need to enter a subject"
+            template_values["content"] = content
 
         if template_values:
             template = jinja_environment.get_template('newpost.html')
@@ -363,6 +371,7 @@ class EditPage(webapp2.RequestHandler):
             post.put()
             # print key.id()
             self.redirect('/blog/' + str(id))
+
 
 class DeletePage(webapp2.RequestHandler):
 
@@ -381,6 +390,7 @@ class DeletePage(webapp2.RequestHandler):
             else:
                 self.response.write("You cannot delete someone else's post :p")
 
+
 class LikePage(webapp2.RequestHandler):
 
     def get(self, id):
@@ -395,11 +405,12 @@ class LikePage(webapp2.RequestHandler):
             if not post.created_by == user.username:
                 id = int(id)
                 post = BlogPosts.get_by_id(id)
-                post.likes +=1
+                post.likes += 1
                 post.put()
-                self.redirect('/blog/'+str(id))
+                self.redirect('/blog/' + str(id))
             else:
                 self.response.write("You cannot like your own post!")
+
 
 class DislikePage(webapp2.RequestHandler):
 
@@ -415,11 +426,12 @@ class DislikePage(webapp2.RequestHandler):
             if not post.created_by == user.username:
                 id = int(id)
                 post = BlogPosts.get_by_id(id)
-                post.dislikes +=1
+                post.dislikes += 1
                 post.put()
-                self.redirect('/blog/'+str(id))
+                self.redirect('/blog/' + str(id))
             else:
                 self.response.write("You cannot dislike your own post!")
+
 
 class EditCommentPage(webapp2.RequestHandler):
 
@@ -437,18 +449,19 @@ class EditCommentPage(webapp2.RequestHandler):
                 template = jinja_environment.get_template('editcomment.html')
                 self.response.out.write(template.render(template_values))
             else:
-                self.response.out.write("You cannot edit someone else's post :p")
+                self.response.out.write(
+                    "You cannot edit someone else's post :p")
         else:
             self.redirect("/signup")
 
-    def post(self,id):
+    def post(self, id):
         id = int(id)
         comment = Comment_db.get_by_id(id)
         template_values = {}
         comment_text = self.request.get("comment")
         # Handles errors messages
         if not comment_text:
-                template_values['error'] = "Write Something"
+            template_values['error'] = "Write Something"
 
         if template_values:
             template = jinja_environment.get_template('editcomment.html')
@@ -458,6 +471,7 @@ class EditCommentPage(webapp2.RequestHandler):
             comment.put()
             # print key.id()
             self.redirect('/blog/' + str(comment.post_id))
+
 
 class DeleteCommentPage(webapp2.RequestHandler):
 
@@ -473,16 +487,18 @@ class DeleteCommentPage(webapp2.RequestHandler):
             if comment.created_by == user.username:
                 post_id = comment.post_id
                 comment.delete()
-                self.redirect('/blog/'+str(post_id))
+                self.redirect('/blog/' + str(post_id))
             else:
                 self.response.write("You cannot delete someone else's comment")
 
 app = webapp2.WSGIApplication([('/signup', AuthenticatorPage),
-    ('/user/welcome', AuthenticationSuccessPage),
-    ('/blog', BlogPage), ('/blog/newpost', BlogNewPostPage),
-    (r'/blog/(\d+)', PostPage), ('/login', LoginPage),
-    ('/logout', LogoutPage),(r'/blog/(\d+)/edit', EditPage),
-    (r'/blog/(\d+)/delete', DeletePage),(r'/blog/(\d+)/like', LikePage),
-    (r'/blog/(\d+)/dislike', DislikePage), (r'/blog/comment/(\d+)/edit', EditCommentPage),
-    (r'/blog/comment/(\d+)/delete', DeleteCommentPage)
-    ], debug=True)
+                               ('/user/welcome', AuthenticationSuccessPage),
+                               ('/blog', BlogPage), ('/blog/newpost', BlogNewPostPage),
+                               (r'/blog/(\d+)', PostPage), ('/login', LoginPage),
+                               ('/logout', LogoutPage), (r'/blog/(\d+)/edit', EditPage),
+                               (r'/blog/(\d+)/delete',
+                                DeletePage), (r'/blog/(\d+)/like', LikePage),
+                               (r'/blog/(\d+)/dislike',
+                                DislikePage), (r'/blog/comment/(\d+)/edit', EditCommentPage),
+                               (r'/blog/comment/(\d+)/delete', DeleteCommentPage)
+                               ], debug=True)

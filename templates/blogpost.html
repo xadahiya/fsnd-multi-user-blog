@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <title>{{data.subject}}</title>
-  </head>
-  <body>
+</head>
+
+<body>
     <h1><a href="/blog">Blog Home</a></h1>
     <hr>
     <h3>{{data.subject}}</h3>
     <p>
-      {{data.content}}
+        {{data.content}}
     </p>
     <h4>Likes:{{data.likes}}</h4>
     <h4>Dislikes:{{data.dislikes}}</h4>
@@ -22,15 +24,13 @@
     <h2>Comments</h2>
     <h3>Write a comment</h3>
     <form method="post">
-    <textarea name="comment" id="comment" cols="30" rows="2"></textarea>
-    <input type="submit" value="comment">
+        <textarea name="comment" id="comment" cols="30" rows="2"></textarea>
+        <input type="submit" value="comment">
     </form>
-    <hr>
-    {% for comment in comment_data %}
-      {{comment.text}}
-      <a href="comment/{{comment.key().id()}}/edit">Edit</a>
-      <a href="comment/{{comment.key().id()}}/delete">Delete</a>
-      <hr>
-    {% endfor %}
-  </body>
+    <hr> {% for comment in comment_data %} {{comment.text}}
+    <a href="comment/{{comment.key().id()}}/edit">Edit</a>
+    <a href="comment/{{comment.key().id()}}/delete">Delete</a>
+    <hr> {% endfor %}
+</body>
+
 </html>
