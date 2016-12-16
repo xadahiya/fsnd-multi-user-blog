@@ -191,12 +191,14 @@ class AuthenticationSuccessPage(webapp2.RequestHandler):
         user_cookie = self.request.cookies.get('userid')
         if user_cookie:
             user = validate_user_cookie(user_cookie)
-            if user:
-                name = user.username
-                template_values = {"name": name}
-                template = jinja_environment.get_template(
-                    'authenticationSuccess.html')
-                self.response.out.write(template.render(template_values))
+        else:
+            user = None
+        if user:
+            name = user.username
+            template_values = {"name": name}
+            template = jinja_environment.get_template(
+                'authenticationSuccess.html')
+            self.response.out.write(template.render(template_values))
         else:
             self.redirect("/signup")
 
@@ -213,6 +215,15 @@ class LogoutPage(webapp2.RequestHandler):
 class BlogPosts(db.Model):
     subject = db.StringProperty()
     content = db.TextProperty()
+    likes = db.IntegerProperty(default = 0)
+    dislikes = db.IntegerProperty(default = 0)
+    created_by = db.StringProperty()
+    date_created = db.DateTimeProperty(auto_now_add=True)
+
+class Comment_db(db.Model):
+    post_id = db.StringProperty()
+    created_by = db.StringProperty()
+    text = db.TextProperty()
     date_created = db.DateTimeProperty(auto_now_add=True)
 
 
@@ -226,54 +237,196 @@ class BlogPage(webapp2.RequestHandler):
         template = jinja_environment.get_template('blog.html')
         self.response.out.write(template.render(template_values))
 
+class BlogNewPostPage(webapp2.RequestHandler):
+
+    def get(self):
+        user_cookie = self.request.cookies.get('userid')
+        if user_cookie:
+            user = validate_user_cookie(user_cookie)
+        if user:
+            template_values = {}
+            template = jinja_environment.get_template('newpost.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            self.redirect('/login')
+
+    def post(self):
+        user_cookie = self.request.cookies.get('userid')
+        if user_cookie:
+            user = validate_user_cookie(user_cookie)
+        if user:
+            template_values = {}
+            subject = self.request.get("subject")
+            content = self.request.get("content")
+            # Handles errors messages
+            if not subject and not content:
+                template_values['error'] = "You need to enter some data for a blog post :p"
+            elif not content:
+                    template_values['error'] = "You need to enter some content"
+                    template_values['subject'] = subject
+            elif not subject:
+                    template_values['error'] = "You need to enter a subject"
+                    template_values["content"] = content
+
+            if template_values:
+                template = jinja_environment.get_template('newpost.html')
+                self.response.out.write(template.render(template_values))
+            else:
+                post = BlogPosts(subject=subject, content=content, created_by=user.username)
+                post_id = post.put().id()
+                # print key.id()
+                self.redirect('/blog/' + str(post_id))
+        else:
+            self.redirect('/login')
 
 class PostPage(webapp2.RequestHandler):
 
     def get(self, id):
-        self.response.headers['Content-Type'] = 'text/html'
         id = int(id)
         post = BlogPosts.get_by_id(id)
-        # q.order('-date_created')
-        template_values = {"data": post}
+        comment_data = Comment_db.all()
+        comment_data.filter("post_id =",str(id))
+
+        template_values = {"data": post, "comment_data":comment_data}
         template = jinja_environment.get_template('blogpost.html')
         self.response.out.write(template.render(template_values))
 
+    def post(self,id):
+        user_cookie = self.request.cookies.get('userid')
+        if user_cookie:
+            user = validate_user_cookie(user_cookie)
+        else:
+            user = None
+        if user:
+            id = int(id)
+            template_values = {}
+            comment_data = self.request.get("comment")
+            # Handles errors messages
 
-class BlogNewPostPage(webapp2.RequestHandler):
+            if not comment_data:
+                template_values['error'] = "You need to write something"
 
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/html'
-        template_values = {}
-        template = jinja_environment.get_template('newpost.html')
-        self.response.out.write(template.render(template_values))
+            if template_values:
+                template = jinja_environment.get_template('blogpost.html')
+                self.response.out.write(template.render(template_values))
+            else:
+                new_comment = Comment_db(post_id = str(id), created_by = user.username, text = comment_data)
+                new_comment.put()
+                # print key.id()
+                self.redirect('/blog/' + str(id))
+        else:
+            self.redirect('/signup')
 
-    def post(self):
+
+class EditPage(webapp2.RequestHandler):
+
+    def get(self, id):
+        user_cookie = self.request.cookies.get('userid')
+        if user_cookie:
+            user = validate_user_cookie(user_cookie)
+        else:
+            user = None
+        if user:
+            id = int(id)
+            post = BlogPosts.get_by_id(id)
+            if post.created_by == user.username:
+                template_values = {"data": post}
+                template = jinja_environment.get_template('editpost.html')
+                self.response.out.write(template.render(template_values))
+            else:
+                self.response.out.write("You cannot edit someone else's post :p")
+        else:
+            self.redirect("/signup")
+
+    def post(self,id):
+        id = int(id)
+        post = BlogPosts.get_by_id(id)
         template_values = {}
         subject = self.request.get("subject")
         content = self.request.get("content")
         # Handles errors messages
         if not subject and not content:
-            template_values[
-                'error'] = "You need to enter some data for a blog post :p"
+            template_values['error'] = "You need to enter some data for a blog post :p"
         elif not content:
-            template_values['error'] = "You need to enter some content"
-            template_values['subject'] = subject
+                template_values['error'] = "You need to enter some content"
+                template_values['subject'] = subject
         elif not subject:
-            template_values['error'] = "You need to enter a subject"
-            template_values["content"] = content
+                template_values['error'] = "You need to enter a subject"
+                template_values["content"] = content
 
         if template_values:
             template = jinja_environment.get_template('newpost.html')
             self.response.out.write(template.render(template_values))
         else:
-            post = BlogPosts(subject=subject, content=content)
-            post_id = post.put().id()
+            post.subject = subject
+            post.content = content
+            post.put()
             # print key.id()
-            self.redirect('/blog/' + str(post_id))
+            self.redirect('/blog/' + str(id))
+
+class DeletePage(webapp2.RequestHandler):
+
+    def get(self, id):
+        user_cookie = self.request.cookies.get('userid')
+        if user_cookie:
+            user = validate_user_cookie(user_cookie)
+        else:
+            user = None
+        if user:
+            if post.created_by == user.username:
+                id = int(id)
+                post = BlogPosts.get_by_id(id)
+                post.delete()
+                self.redirect('/blog')
+            else:
+                self.response.write("You cannot delete someone else's post :p")
+
+class LikePage(webapp2.RequestHandler):
+
+    def get(self, id):
+        user_cookie = self.request.cookies.get('userid')
+        if user_cookie:
+            user = validate_user_cookie(user_cookie)
+        else:
+            user = None
+        if user:
+            id = int(id)
+            post = BlogPosts.get_by_id(id)
+            if not post.created_by == user.username:
+                id = int(id)
+                post = BlogPosts.get_by_id(id)
+                post.likes +=1
+                post.put()
+                self.redirect('/blog/'+str(id))
+            else:
+                self.response.write("You cannot like your own post!")
+
+class DislikePage(webapp2.RequestHandler):
+
+    def get(self, id):
+        user_cookie = self.request.cookies.get('userid')
+        if user_cookie:
+            user = validate_user_cookie(user_cookie)
+        else:
+            user = None
+        if user:
+            id = int(id)
+            post = BlogPosts.get_by_id(id)
+            if not post.created_by == user.username:
+                id = int(id)
+                post = BlogPosts.get_by_id(id)
+                post.dislikes +=1
+                post.put()
+                self.redirect('/blog/'+str(id))
+            else:
+                self.response.write("You cannot dislike your own post!")
+
 
 app = webapp2.WSGIApplication([('/signup', AuthenticatorPage),
     ('/user/welcome', AuthenticationSuccessPage),
     ('/blog', BlogPage), ('/blog/newpost', BlogNewPostPage),
     (r'/blog/(\d+)', PostPage), ('/login', LoginPage),
-    ('/logout', LogoutPage),
-], debug=True)
+    ('/logout', LogoutPage),(r'/blog/(\d+)/edit', EditPage),
+    (r'/blog/(\d+)/delete', DeletePage),(r'/blog/(\d+)/like', LikePage),
+    (r'/blog/(\d+)/dislike', DislikePage)
+    ], debug=True)

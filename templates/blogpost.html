@@ -6,9 +6,29 @@
   </head>
   <body>
     <h1><a href="/blog">Blog Home</a></h1>
+    <hr>
     <h3>{{data.subject}}</h3>
     <p>
       {{data.content}}
     </p>
+    <h4>Likes:{{data.likes}}</h4>
+    <h4>Dislikes:{{data.dislikes}}</h4>
+    <hr>
+    <a href="{{data.key().id()}}/edit">Edit</a>
+    <a href="{{data.key().id()}}/delete">Delete</a>
+    <a href="{{data.key().id()}}/like">Like</a>
+    <a href="{{data.key().id()}}/dislike">Dislike</a>
+    <div>{{error}}</div>
+    <h2>Comments</h2>
+    <h3>Write a comment</h3>
+    <form method="post">
+    <textarea name="comment" id="comment" cols="30" rows="2"></textarea>
+    <input type="submit" value="comment">
+    </form>
+    <hr>
+    {% for comment in comment_data %}
+      {{comment.text}}
+      <hr>
+    {% endfor %}
   </body>
 </html>
