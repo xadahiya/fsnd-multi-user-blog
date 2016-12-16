@@ -28,6 +28,8 @@
     <hr>
     {% for comment in comment_data %}
       {{comment.text}}
+      <a href="comment/{{comment.key().id()}}/edit">Edit</a>
+      <a href="comment/{{comment.key().id()}}/delete">Delete</a>
       <hr>
     {% endfor %}
   </body>

@@ -373,9 +373,9 @@ class DeletePage(webapp2.RequestHandler):
         else:
             user = None
         if user:
+            id = int(id)
+            post = BlogPosts.get_by_id(id)
             if post.created_by == user.username:
-                id = int(id)
-                post = BlogPosts.get_by_id(id)
                 post.delete()
                 self.redirect('/blog')
             else:
@@ -421,6 +421,61 @@ class DislikePage(webapp2.RequestHandler):
             else:
                 self.response.write("You cannot dislike your own post!")
 
+class EditCommentPage(webapp2.RequestHandler):
+
+    def get(self, id):
+        user_cookie = self.request.cookies.get('userid')
+        if user_cookie:
+            user = validate_user_cookie(user_cookie)
+        else:
+            user = None
+        if user:
+            id = int(id)
+            comment = Comment_db.get_by_id(id)
+            if comment.created_by == user.username:
+                template_values = {"data": comment}
+                template = jinja_environment.get_template('editcomment.html')
+                self.response.out.write(template.render(template_values))
+            else:
+                self.response.out.write("You cannot edit someone else's post :p")
+        else:
+            self.redirect("/signup")
+
+    def post(self,id):
+        id = int(id)
+        comment = Comment_db.get_by_id(id)
+        template_values = {}
+        comment_text = self.request.get("comment")
+        # Handles errors messages
+        if not comment_text:
+                template_values['error'] = "Write Something"
+
+        if template_values:
+            template = jinja_environment.get_template('editcomment.html')
+            self.response.out.write(template.render(template_values))
+        else:
+            comment.text = comment_text
+            comment.put()
+            # print key.id()
+            self.redirect('/blog/' + str(comment.post_id))
+
+class DeleteCommentPage(webapp2.RequestHandler):
+
+    def get(self, id):
+        user_cookie = self.request.cookies.get('userid')
+        if user_cookie:
+            user = validate_user_cookie(user_cookie)
+        else:
+            user = None
+        if user:
+            id = int(id)
+            comment = Comment_db.get_by_id(id)
+            if comment.created_by == user.username:
+                post_id = comment.post_id
+                comment.delete()
+                self.redirect('/blog/'+str(post_id))
+            else:
+                self.response.write("You cannot delete someone else's comment")
 
 app = webapp2.WSGIApplication([('/signup', AuthenticatorPage),
     ('/user/welcome', AuthenticationSuccessPage),
@@ -428,5 +483,6 @@ app = webapp2.WSGIApplication([('/signup', AuthenticatorPage),
     (r'/blog/(\d+)', PostPage), ('/login', LoginPage),
     ('/logout', LogoutPage),(r'/blog/(\d+)/edit', EditPage),
     (r'/blog/(\d+)/delete', DeletePage),(r'/blog/(\d+)/like', LikePage),
-    (r'/blog/(\d+)/dislike', DislikePage)
+    (r'/blog/(\d+)/dislike', DislikePage), (r'/blog/comment/(\d+)/edit', EditCommentPage),
+    (r'/blog/comment/(\d+)/delete', DeleteCommentPage)
     ], debug=True)
