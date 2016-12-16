@@ -1,2 +1,2 @@
-# fsnd-multi-user-blog
-Udacity Full stack nanodegree project 3 (Multi User Blog)
+
+## Udacity Full stack nanodegree's Multiuser Blog  solution using google appengine

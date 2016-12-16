@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Write a post!</title>
+  </head>
+  <body>
+    <form method="post">
+      <label for="subject">Subject</label>
+      <input type="text" name="subject" id="subject" value={{subject}}>
+      <br>
+      <br>
+      <label for="content">Content</label>
+      <textarea name="content" id="content" rows="8" cols="40">{{content}}</textarea>
+      <div class="error">
+          <h3>{{error}}</h3>
+      </div>
+      <input type="submit" value="submit">
+    </form>
+  </body>
+</html>

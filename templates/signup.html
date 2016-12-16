@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Simple Authenticator!!!</title>
+  </head>
+  <body>
+    <form method="post">
+      <h3>Enter your Credentials</h3>
+
+      <label for="username" style="display:block;">Username
+      <input type="text" name="username" value="{{username}}">
+      <div style="color:red; display:inline;">
+        {{username_error}}
+      </div>
+    </label>
+
+      <label for="password" style="display:block;">Enter Password
+      <input type="password" name="password" value="">
+      <div style="color:red; display:inline;">
+        {{password_error}}
+      </div>
+    </label>
+      <label for="verify" style="display:block;">Verify Password
+      <input type="password" name="verify" value="">
+      <div style="color:red; display:inline;">
+        {{verification_error}}
+      </div>
+    </label>
+      <label for="email" style="display:block;">Email address(optional)
+      <input type="text" name="email" value="{{email}}">
+      <div style="color:red; display:inline;">
+        {{email_error}}
+      </div>
+    </label>
+      <input type="submit" value="Register">
+    </form>
+  </body>
+</html>

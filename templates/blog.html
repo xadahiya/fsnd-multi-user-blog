@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>My blog!</title>
+  </head>
+  <body>
+    <h1>Welcome to my Blog</h1>
+    <hr>
+    <h2>Blog posts</h2>
+    <!-- {{data}} -->
+    {% for record in data %}
+      <h3>{{record.subject}}</h3>
+      <p>
+        {{record.content}}
+      </p>
+      <a href="/blog/{{record.key().id()}}">View Post</a>
+      <hr>
+    {% endfor %}
+
+  </body>
+</html>
